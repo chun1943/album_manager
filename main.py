@@ -1,3 +1,4 @@
+import os
 from typing import Optional, List
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -193,27 +194,13 @@ def update_album(user_id: int, album_id: int, payload: AlbumUpdate, db: Session 
 
 @app.get("/api/search/barcode/{barcode}")
 async def search_album_by_barcode(barcode: str):
-	await musicbrainz_service.search_by_barcode(barcode)
-	if barcode == "5099969945526":
-		return {
-			"id": barcode,
-            "title": "Abbey Road",
-            "artist": "The Beatles",
-            "year": 1969,
-            "barcode": barcode,
-            "cover_url": "https://i.scdn.co/image/ab67616d0000b273dc30583ba717007b00cceb25",
-            "genre": "Rock",
-		}
-	else:
-		return {
-			"id": barcode,
-            "title": f"專輯 {barcode[-4:]}",
-            "artist": "未知藝人",
-            "year": 2024,
-            "barcode": barcode,
-            "cover_url": None,
-            "genre": "Unknown","id": barcode,
-		}
+	"""
+	Search for an album by barcode using MusicBrainz API
+	"""
+	result = await musicbrainz_service.search_by_barcode(barcode)
+	if result is None:
+		raise HTTPException(status_code=404, detail=f"Album with barcode {barcode} not found")
+	return result
 
 
 # Health check
