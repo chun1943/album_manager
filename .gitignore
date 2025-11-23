@@ -28,3 +28,16 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# BMad Method
+# web-bundles/ contains large web agent bundle files that can be regenerated
+# These files are for web UI use (Gemini, ChatGPT) and not needed for IDE development
+web-bundles/
+
+# BMad debug logs
+.ai/debug-log.md
+
+# Note: The following BMad files SHOULD be committed:
+# - .bmad-core/ (contains project configuration and core resources)
+# - docs/ (PRD, architecture, stories - all project documentation)
+# - .cursor/rules/ (if using Cursor IDE)
