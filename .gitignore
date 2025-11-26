@@ -41,3 +41,6 @@ web-bundles/
 # - .bmad-core/ (contains project configuration and core resources)
 # - docs/ (PRD, architecture, stories - all project documentation)
 # - .cursor/rules/ (if using Cursor IDE)
+# BMAD (local only)
+.bmad-core/
+.bmad-*/
