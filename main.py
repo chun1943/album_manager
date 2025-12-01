@@ -8,11 +8,26 @@ from database import engine, get_db
 from models import Base, User, Album
 from schemas import UserCreate, UserOut, AlbumCreate, AlbumUpdate, AlbumOut, ExistsOut
 from utils import normalize_title
+from contextlib import asynccontextmanager
+from musicbrainz_service import MusicBrainzService
 
-from musicbrainz_service import musicbrainz_service
+# Global variable to hold the service instance
+musicbrainz_service_instance: Optional[MusicBrainzService] = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # On startup
+    global musicbrainz_service_instance
+    musicbrainz_service_instance = MusicBrainzService()
+    print("MusicBrainzService initialized.")
+    yield
+    # On shutdown
+    if musicbrainz_service_instance:
+        await musicbrainz_service_instance.close()
+        print("MusicBrainzService closed.")
 
 # FastAPI app
-app = FastAPI(title="Album Manager API")
+app = FastAPI(title="Album Manager API", lifespan=lifespan)
 
 # CORS (adjust origins as needed; for development allow all)
 app.add_middleware(
@@ -22,11 +37,6 @@ app.add_middleware(
 	allow_methods=["*"],
 	allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def on_startup() -> None:
-	Base.metadata.create_all(bind=engine)
 
 
 # User endpoints
@@ -194,13 +204,15 @@ def update_album(user_id: int, album_id: int, payload: AlbumUpdate, db: Session 
 
 @app.get("/api/search/barcode/{barcode}")
 async def search_album_by_barcode(barcode: str):
-	"""
-	Search for an album by barcode using MusicBrainz API
-	"""
-	result = await musicbrainz_service.search_by_barcode(barcode)
-	if result is None:
-		raise HTTPException(status_code=404, detail=f"Album with barcode {barcode} not found")
-	return result
+    """
+    Search for an album by barcode using MusicBrainz API
+    """
+    if musicbrainz_service_instance is None:
+        raise HTTPException(status_code=500, detail="MusicBrainz service not available")
+    result = await musicbrainz_service_instance.search_by_barcode(barcode)
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Album with barcode {barcode} not found")
+    return result
 
 
 # Health check

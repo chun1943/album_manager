@@ -98,6 +98,6 @@ class MusicBrainzService:
         """
         await self.client.aclose()
 
-musicbrainz_service = MusicBrainzService()
+
 
 

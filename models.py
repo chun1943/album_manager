@@ -21,6 +21,9 @@ class Album(Base):
     normalized_title: Mapped[str] = mapped_column(String(255), index=True)
     barcode: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
     artist: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    year: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    genre: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    cover_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     owner: Mapped[User] = relationship(back_populates="albums")  # type: ignore
